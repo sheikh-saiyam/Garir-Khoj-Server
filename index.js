@@ -41,7 +41,7 @@ async function run() {
     });
     // <---Add New Car To DB---> // CREATE
 
-    // <---Add All Cars to Server---> // READ
+    // <---Add Available-Cars Data with search,sorting functionality to Server--->//READ
     app.get("/available-cars", async (req, res) => {
       const search = req.query.search;
       const sortByPrice = req.query.sortByPrice;
@@ -55,7 +55,7 @@ async function run() {
       const result = await carCollection.find(query, options).toArray();
       res.send(result);
     });
-    // <---Add All Cars to Server---> // READ
+    // <---Add Available-Cars Data with search,sorting functionality to Server--->// READ
 
     // <--Add Cars to server base on email---> // READ //
     app.get("/cars/:email", async (req, res) => {
@@ -64,7 +64,7 @@ async function run() {
       const result = await carCollection.find(query).toArray();
       res.send(result);
     });
-    // <--Add Cars to server base on email---> // READ // 
+    // <--Add Cars to server base on email---> // READ //
 
     // Add Single Car Data To Server base on _id // READ //
     app.get("/car/:id", async (req, res) => {
