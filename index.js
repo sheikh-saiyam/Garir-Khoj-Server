@@ -66,14 +66,14 @@ async function run() {
     });
     // <--Add Cars to server base on email---> // READ // 
 
-    // Add Single Car Data To Server base on _id //READ
+    // Add Single Car Data To Server base on _id // READ //
     app.get("/car/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await carCollection.findOne(query);
       res.send(result);
     });
-    // Add Single Car Data To Server base on _id //READ
+    // Add Single Car Data To Server base on _id // READ //
 
     // <-----Car CRUD Functionality-----> \\
 
