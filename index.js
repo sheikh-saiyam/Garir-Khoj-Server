@@ -57,14 +57,14 @@ async function run() {
     });
     // <---Add All Cars to Server---> // READ
 
-    // <--Add Cars to server base on email---> //READ
+    // <--Add Cars to server base on email---> // READ //
     app.get("/cars/:email", async (req, res) => {
       const email = req.params.email;
       const query = { "user_details.email": email };
       const result = await carCollection.find(query).toArray();
       res.send(result);
     });
-    // <--Add Cars to server base on email---> //READ
+    // <--Add Cars to server base on email---> // READ // 
 
     // Add Single Car Data To Server base on _id //READ
     app.get("/car/:id", async (req, res) => {
