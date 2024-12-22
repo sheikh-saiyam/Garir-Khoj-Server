@@ -75,6 +75,15 @@ async function run() {
     });
     // Add Single Car Data To Server base on _id // READ //
 
+    // <---Delete A Car---> // DELETE //
+    app.delete("/car/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await carCollection.deleteOne(query);
+      res.send(result);
+    });
+    // <---Delete A Car---> // DELETE //
+
     // <-----Car CRUD Functionality-----> \\
 
     // <---------- ALL CRUD FUNCTIONALITY ----------> \\
