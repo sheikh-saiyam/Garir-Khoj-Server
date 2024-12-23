@@ -75,6 +75,24 @@ async function run() {
     });
     // Add Single Car Data To Server base on _id // READ //
 
+    // <---Update Car---> // UPDATE
+    app.put("/update-car/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const carData = req.body;
+      const updatedCarData = {
+        $set: carData,
+      };
+      const options = { upsert: true };
+      const result = await carCollection.updateOne(
+        filter,
+        updatedCarData,
+        options
+      );
+      res.send(result);
+    });
+    // <---Update Car---> // UPDATE
+
     // <---Delete A Car---> // DELETE //
     app.delete("/car/:id", async (req, res) => {
       const id = req.params.id;
