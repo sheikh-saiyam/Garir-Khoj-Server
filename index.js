@@ -45,17 +45,36 @@ async function run() {
     app.get("/available-cars", async (req, res) => {
       const search = req.query.search;
       const sortByPrice = req.query.sortByPrice;
+      const sortByDate = req.query.sortByDate;
       let query = { car_model: { $regex: search, $options: "i" } };
       let options = {};
       if (sortByPrice) {
-        options = {
-          sort: { daily_rental_price: sortByPrice === "asc" ? 1 : -1 },
+        options.sort = {
+          ...options.sort,
+          daily_rental_price: sortByPrice === "asc" ? 1 : -1,
+        };
+      }
+      if (sortByDate) {
+        options.sort = {
+          ...options.sort,
+          added_date: sortByDate === "asc" ? 1 : -1,
         };
       }
       const result = await carCollection.find(query, options).toArray();
       res.send(result);
     });
     // <---Add Available-Cars Data with search,sorting functionality to Server--->// READ
+
+    // <---Get latest Car data for home page recent-listings---> // READ
+    app.get("/recent-listings", async (req, res) => {
+      const result = await carCollection
+        .find()
+        .sort({ added_date: -1 })
+        .limit(6)
+        .toArray();
+      res.send(result);
+    });
+    // <---Get latest Car data for home page recent-listings---> // READ
 
     // <--Add Cars to server base on email---> // READ //
     app.get("/cars/:email", async (req, res) => {
