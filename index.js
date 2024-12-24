@@ -27,6 +27,7 @@ async function run() {
     await client.connect(); // deployment off
     // <-----ALL DB & COLLECTIONS-----> \\
     const carCollection = client.db("carDB").collection("cars");
+    const bookingCollection = client.db("bookingDB").collection("bookings");
     // <-----ALL DB & COLLECTIONS-----> \\
 
     // <---------- ALL CRUD FUNCTIONALITY ----------> \\
@@ -122,6 +123,29 @@ async function run() {
     // <---Delete A Car---> // DELETE //
 
     // <-----Car CRUD Functionality-----> \\
+
+    // <-----Booking CRUD Functionality-----> \\
+
+    // <---Post A New Booking---> // CREATE
+    app.post("/booking", async (req, res) => {
+      const newBooking = req.body;
+      const result = await bookingCollection.insertOne(newBooking);
+      // Increase Car BookingCount
+      const filter = { _id: new ObjectId(newBooking.car_id) };
+      const updatedBookingCount = {
+        $inc: { bookingCount: 1 },
+      };
+      await carCollection.updateOne(filter, updatedBookingCount);
+      // Increase Car BookingCount
+      res.send(result);
+    });
+    // <---Post A New Booking---> // CREATE
+
+    // <---Add Bookings to server base on booked_user_email---> // READ
+   
+    // <---Add Bookings to server base on booked_user_email---> // READ
+
+    // <-----Booking CRUD Functionality-----> \\
 
     // <---------- ALL CRUD FUNCTIONALITY ----------> \\
 
