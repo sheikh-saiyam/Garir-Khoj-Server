@@ -142,7 +142,12 @@ async function run() {
     // <---Post A New Booking---> // CREATE
 
     // <---Add Bookings to server base on booked_user_email---> // READ
-   
+    app.get("/bookings/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { booked_user_email: email };
+      const result = await bookingCollection.find(query).toArray();
+      res.send(result);
+    });
     // <---Add Bookings to server base on booked_user_email---> // READ
 
     // <-----Booking CRUD Functionality-----> \\
