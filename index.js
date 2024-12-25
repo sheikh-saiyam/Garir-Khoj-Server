@@ -134,6 +134,10 @@ async function run() {
       const filter = { _id: new ObjectId(newBooking.car_id) };
       const updatedBookingCount = {
         $inc: { bookingCount: 1 },
+        $set: {
+          availability: (newBooking.availability = "No"),
+          bookingStatus: (newBooking.bookingStatus = "Confirmed"),
+        },
       };
       await carCollection.updateOne(filter, updatedBookingCount);
       // Increase Car BookingCount
@@ -149,6 +153,56 @@ async function run() {
       res.send(result);
     });
     // <---Add Bookings to server base on booked_user_email---> // READ
+
+    // <---Change/Update Booking Status---> // PATCH
+    app.patch("/update-booking-status/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const { booking_status: bookingStatus, car_id } = req.body;
+
+        // Update the booking status in the booking collection
+        const bookingFilter = { _id: new ObjectId(id) };
+        const updatedBookingStatus = {
+          $set: { bookingStatus },
+        };
+
+        const bookingResult = await bookingCollection.updateOne(
+          bookingFilter,
+          updatedBookingStatus
+        );
+
+        if (bookingStatus === "Confirmed") {
+          availability = "No";
+        } else if (bookingStatus === "Cancelled") {
+          availability = "Yes";
+        }
+
+        // Update the car's status in the car collection
+        const carFilter = { _id: new ObjectId(car_id) };
+        const updatedCarStatus = {
+          $set: {
+            availability: "Yes",
+            bookingStatus: "",
+          },
+        };
+
+        const carResult = await carCollection.updateOne(
+          carFilter,
+          updatedCarStatus
+        );
+
+        res.send({
+          bookingResult,
+          carResult,
+        });
+      } catch (error) {
+        res
+          .status(500)
+          .send({ success: false, message: "Internal server error" });
+      }
+    });
+
+    // <---Change/Update Booking Status---> // PATCH
 
     // <-----Booking CRUD Functionality-----> \\
 
