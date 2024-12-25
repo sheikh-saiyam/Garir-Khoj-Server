@@ -154,7 +154,7 @@ async function run() {
     });
     // <---Add Bookings to server base on booked_user_email---> // READ
 
-    // <---Change/Update Booking Status---> // PATCH
+    // <---Change/Update of car and booking data Booking Status---> // PATCH
     app.patch("/update-booking-status/:id", async (req, res) => {
       try {
         const id = req.params.id;
@@ -202,7 +202,29 @@ async function run() {
       }
     });
 
-    // <---Change/Update Booking Status---> // PATCH
+    // <---Change/Update of car and booking data Booking Status---> // PATCH
+
+    // <---Modify Booking Date---> // PUT
+    app.put("/modify-booking-date/:id", async (req, res) => {
+      const id = req.params.id;
+      const bookingData = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const modifiedBookingData = {
+        $set: {
+          booking_start_date: bookingData.booking_start_date,
+          booking_end_date: bookingData.booking_end_date,
+          booking_days_difference: bookingData.booking_days_difference,
+          totalPriceOfEntireBookingPeriod:
+            bookingData.totalPriceOfEntireBookingPeriod,
+        },
+      };
+      const result = await bookingCollection.updateOne(
+        filter,
+        modifiedBookingData
+      );
+      res.send(result);
+    });
+    // <---Modify Booking Date---> // PUT
 
     // <-----Booking CRUD Functionality-----> \\
 
