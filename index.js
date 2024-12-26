@@ -57,7 +57,7 @@ async function run() {
     app.post("/jwt", async (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.JWT_SECRET, {
-        expiresIn: "30d",
+        expiresIn: "14d",
       });
       res
         .cookie("token", token, {
@@ -74,6 +74,7 @@ async function run() {
       res
         .clearCookie("token", {
           maxAge: 0,
+          httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
         })
@@ -105,7 +106,10 @@ async function run() {
       const search = req.query.search;
       const sortByPrice = req.query.sortByPrice;
       const sortByDate = req.query.sortByDate;
-      let query = { car_model: { $regex: search, $options: "i" } };
+      let query = {
+        car_model: { $regex: search, $options: "i" },
+        availability: "Yes",
+      };
       let options = {};
       if (sortByPrice) {
         options.sort = {
@@ -126,8 +130,9 @@ async function run() {
 
     // <---Get latest Car data for home page recent-listings---> // READ
     app.get("/recent-listings", async (req, res) => {
+      const query = { availability: "Yes" };
       const result = await carCollection
-        .find()
+        .find(query)
         .sort({ added_date: -1 })
         .limit(6)
         .toArray();
