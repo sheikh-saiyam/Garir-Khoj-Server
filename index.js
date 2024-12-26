@@ -20,6 +20,22 @@ app.use(express.json());
 app.use(cookieParser());
 // middlewares
 
+// <-----Verify Token Function-----> //
+const verifyToken = (req, res, next) => {
+  const token = req.cookies?.token;
+  if (!token) {
+    return res.status(401).send({ massage: "Un Authorized Access" });
+  }
+  jwt.verify(token, process.env.JWT_SECRET, (error, decoded) => {
+    if (error) {
+      return res.status(401).send({ massage: "Un Authorized Access" });
+    }
+    req.user = decoded;
+  });
+  next();
+};
+// <-----Verify Token Function-----> //
+
 // MongoDB Setup
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.vocag.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
@@ -43,7 +59,6 @@ async function run() {
       const token = jwt.sign(user, process.env.JWT_SECRET, {
         expiresIn: "30d",
       });
-      console.log("token-->", token);
       res
         .cookie("token", token, {
           httpOnly: true,
@@ -53,7 +68,19 @@ async function run() {
         .send({ success: true });
     });
     // Create Jwt Token On Successful Login Register \\
-    
+
+    // <--Clear Token From Cookies On Logout--> //
+    app.get("/logout", async (req, res) => {
+      res
+        .clearCookie("token", {
+          maxAge: 0,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+        })
+        .send({ success: true });
+    });
+    // <--Clear Token From Cookies On Logout--> //
+
     // <-----JWT API's And Functionality-----> \\
 
     // <-----ALL DB & COLLECTIONS-----> \\
@@ -109,8 +136,14 @@ async function run() {
     // <---Get latest Car data for home page recent-listings---> // READ
 
     // <--Add Cars to server base on email---> // READ //
-    app.get("/cars/:email", async (req, res) => {
+    app.get("/cars/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
+      // Email Verification Using Token
+      const decodedEmail = req.user?.email;
+      if (decodedEmail !== email) {
+        return res.status(403).send({ massage: "Un Authorized Access" });
+      }
+      // Email Verification Using Token
       const query = { "user_details.email": email };
       const result = await carCollection.find(query).toArray();
       res.send(result);
