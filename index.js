@@ -210,8 +210,14 @@ async function run() {
     // <---Post A New Booking---> // CREATE
 
     // <---Add Bookings to server base on booked_user_email---> // READ
-    app.get("/bookings/:email", async (req, res) => {
+    app.get("/bookings/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
+      // Email Verification Using Token
+      const decodedEmail = req.user?.email;
+      if (decodedEmail !== email) {
+        return res.status(403).send({ massage: "Un Authorized Access" });
+      }
+      // Email Verification Using Token
       const query = { booked_user_email: email };
       const result = await bookingCollection.find(query).toArray();
       res.send(result);
