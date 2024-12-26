@@ -9,7 +9,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 const corsOptions = {
-  origin: ["http://localhost:5173"],
+  origin: ["http://localhost:5173", "https://saiyam-assignment11.netlify.app"],
   credentials: true,
   optionalSuccessStatus: 200,
 };
@@ -49,9 +49,15 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    await client.connect(); // deployment off
-
     // <-----JWT API's And Functionality-----> \\
+
+    // Cookie Options
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+    };
+    // Cookie Options
 
     // Create Jwt Token On Successful Login Register \\
     app.post("/jwt", async (req, res) => {
@@ -59,25 +65,14 @@ async function run() {
       const token = jwt.sign(user, process.env.JWT_SECRET, {
         expiresIn: "14d",
       });
-      res
-        .cookie("token", token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-        })
-        .send({ success: true });
+      res.cookie("token", token, cookieOptions).send({ success: true });
     });
     // Create Jwt Token On Successful Login Register \\
 
     // <--Clear Token From Cookies On Logout--> //
-    app.get("/logout", async (req, res) => {
+    app.post("/logout", async (req, res) => {
       res
-        .clearCookie("token", {
-          maxAge: 0,
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-        })
+        .clearCookie("token", { ...cookieOptions, maxAge: 0 })
         .send({ success: true });
     });
     // <--Clear Token From Cookies On Logout--> //
@@ -306,10 +301,10 @@ async function run() {
     // <---------- ALL CRUD FUNCTIONALITY ----------> \\
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    // await client.db("admin").command({ ping: 1 });
+    // console.log(
+    //   "Pinged your deployment. You successfully connected to MongoDB!"
+    // );
   } catch (error) {
     console.log("Error caught-->", error);
   }
