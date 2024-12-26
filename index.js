@@ -1,14 +1,23 @@
 const express = require("express");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
-const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 
 const app = express();
 const port = process.env.PORT || 5000;
 
+const corsOptions = {
+  origin: ["http://localhost:5173"],
+  credentials: true,
+  optionalSuccessStatus: 200,
+};
+
 // middlewares
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
+app.use(cookieParser());
 // middlewares
 
 // MongoDB Setup
@@ -25,6 +34,28 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect(); // deployment off
+
+    // <-----JWT API's And Functionality-----> \\
+
+    // Create Jwt Token On Successful Login Register \\
+    app.post("/jwt", async (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.JWT_SECRET, {
+        expiresIn: "30d",
+      });
+      console.log("token-->", token);
+      res
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+        })
+        .send({ success: true });
+    });
+    // Create Jwt Token On Successful Login Register \\
+    
+    // <-----JWT API's And Functionality-----> \\
+
     // <-----ALL DB & COLLECTIONS-----> \\
     const carCollection = client.db("carDB").collection("cars");
     const bookingCollection = client.db("bookingDB").collection("bookings");
