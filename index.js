@@ -9,7 +9,11 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 const corsOptions = {
-  origin: ["http://localhost:5173", "https://saiyam-assignment11.netlify.app"],
+  origin: [
+    "http://localhost:5173",
+    "https://saiyam-assignment11.netlify.app",
+    "https://garir-khoj.netlify.app",
+  ],
   credentials: true,
   optionalSuccessStatus: 200,
 };
